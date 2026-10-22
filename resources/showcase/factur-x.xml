@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Factur-X (ZUGFeRD) de ejemplo: CII (Cross Industry Invoice), perfil BASIC WL.
+
+    El XML lo genera la aplicación. Vellum solo lo incrusta en el PDF y marca
+    el documento como PDF/A-3b, de forma que un programa de facturación pueda
+    leer la factura sin resorting a OCR.
+-->
+<rsm:CrossIndustryInvoice
+    xmlns:rsm="urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100"
+    xmlns:ram="urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100"
+    xmlns:udt="urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100">
+
+    <rsm:ExchangedDocumentContext>
+        <ram:BusinessProcessSpecifiedDocumentContextParameter>
+            <ram:ID>urn:fdcpepp:peppol.eu:2017:poacc:billing:01:1.0</ram:ID>
+        </ram:BusinessProcessSpecifiedDocumentContextParameter>
+        <ram:GuidelineSpecifiedDocumentContextParameter>
+            <ram:ID>urn:factur-x.eu:1p0:basicwl</ram:ID>
+        </ram:GuidelineSpecifiedDocumentContextParameter>
+    </rsm:ExchangedDocumentContext>
+
+    <rsm:ExchangedDocument>
+        <ram:ID>F-2026-0042</ram:ID>
+        <ram:TypeCode>380</ram:TypeCode>
+        <ram:IssueDateTime>
+            <udt:DateTimeString format="102">20261022</udt:DateTimeString>
+        </ram:IssueDateTime>
+        <ram:IncludedNote>
+            <ram:Content>Factura emitida por la aplicación de demostración.</ram:Content>
+        </ram:IncludedNote>
+    </rsm:ExchangedDocument>
+
+    <rsm:SupplyChainTradeTransaction>
+
+        <ram:IncludedSupplyChainTradeLineItem>
+            <ram:AssociatedDocumentLineDocument>
+                <ram:LineID>1</ram:LineID>
+                <ram:IncludedNote>
+                    <ram:Content>Desarrollo a medida · sprint 14</ram:Content>
+                </ram:IncludedNote>
+            </ram:AssociatedDocumentLineDocument>
+            <ram:SpecifiedTradeProduct>
+                <ram:Name>Desarrollo a medida</ram:Name>
+            </ram:SpecifiedTradeProduct>
+            <ram:SpecifiedLineTradeAgreement>
+                <ram:NetPriceProductTradePrice>
+                    <ram:ChargeAmount currencyID="EUR">68.50</ram:ChargeAmount>
+                </ram:NetPriceProductTradePrice>
+            </ram:SpecifiedLineTradeAgreement>
+            <ram:SpecifiedLineTradeDelivery>
+                <ram:BilledQuantity unitCode="C62">32</ram:BilledQuantity>
+            </ram:SpecifiedLineTradeDelivery>
+            <ram:SpecifiedLineTradeSettlement>
+                <ram:ApplicableTradeTax>
+                    <ram:TypeCode>VAT</ram:TypeCode>
+                    <ram:CategoryCode>S</ram:CategoryCode>
+                    <ram:RateApplicablePercent>21</ram:RateApplicablePercent>
+                </ram:ApplicableTradeTax>
+                <ram:SpecifiedTradeSettlementLineMonetarySummation>
+                    <ram:LineTotalAmount currencyID="EUR">2192.00</ram:LineTotalAmount>
+                </ram:SpecifiedTradeSettlementLineMonetarySummation>
+            </ram:SpecifiedLineTradeSettlement>
+        </ram:IncludedSupplyChainTradeLineItem>
+
+        <ram:ApplicableHeaderTradeAgreement>
+            <ram:BuyerReference>REF-0042</ram:BuyerReference>
+            <ram:SellerTradeParty>
+                <ram:Name>Vellum Fábrica de PDF, S.L.</ram:Name>
+                <ram:SpecifiedLegalOrganization>
+                    <ram:ID schemeID="0088">B12345678</ram:ID>
+                </ram:SpecifiedLegalOrganization>
+            </ram:SellerTradeParty>
+            <ram:BuyerTradeParty>
+                <ram:Name>Comercial Atlántica, S.A.</ram:Name>
+                <ram:SpecifiedLegalOrganization>
+                    <ram:ID schemeID="0088">A87654321</ram:ID>
+                </ram:SpecifiedLegalOrganization>
+            </ram:BuyerTradeParty>
+        </ram:ApplicableHeaderTradeAgreement>
+
+        <ram:ApplicableHeaderTradeDelivery>
+            <ram:ActualDeliverySupplyChainEvent>
+                <ram:OccurrenceDateTime>
+                    <udt:DateTimeString format="102">20261022</udt:DateTimeString>
+                </ram:OccurrenceDateTime>
+            </ram:ActualDeliverySupplyChainEvent>
+        </ram:ApplicableHeaderTradeDelivery>
+
+        <ram:ApplicableHeaderTradeSettlement>
+            <ram:InvoiceCurrencyCode>EUR</ram:InvoiceCurrencyCode>
+            <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
+                <ram:LineTotalAmount currencyID="EUR">3508.00</ram:LineTotalAmount>
+                <ram:TaxBasisTotalAmount currencyID="EUR">3508.00</ram:TaxBasisTotalAmount>
+                <ram:TaxTotalAmount currencyID="EUR">736.68</ram:TaxTotalAmount>
+                <ram:GrandTotalAmount currencyID="EUR">4244.68</ram:GrandTotalAmount>
+                <ram:DuePayableAmount currencyID="EUR">4244.68</ram:DuePayableAmount>
+            </ram:SpecifiedTradeSettlementHeaderMonetarySummation>
+            <ram:SpecifiedTradePaymentTerms>
+                <ram:Description>30 días desde la fecha de emisión</ram:Description>
+                <ram:DueDateDateTime>
+                    <udt:DateTimeString format="102">20261121</udt:DateTimeString>
+                </ram:DueDateDateTime>
+            </ram:SpecifiedTradePaymentTerms>
+        </ram:ApplicableHeaderTradeSettlement>
+
+    </rsm:SupplyChainTradeTransaction>
+</rsm:CrossIndustryInvoice>

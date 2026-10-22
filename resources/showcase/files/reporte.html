@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Informe trimestral</title>
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            color: #1f2933;
+            font-family: "DejaVu Sans", sans-serif;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        h1 { font-size: 18px; margin: 0 0 4px; }
+        h2 { font-size: 13px; margin: 16px 0 6px; }
+        .muted { color: #616e7c; }
+
+        .aviso {
+            border-left: 3px solid #0b5cad;
+            background: #eef4fb;
+            padding: 8px 12px;
+            margin-bottom: 14px;
+        }
+
+        table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+        th {
+            background: #1f2933;
+            color: #ffffff;
+            text-align: left;
+            padding: 7px 10px;
+            font-size: 10px;
+        }
+        td { border-bottom: 1px solid #e4e7eb; padding: 7px 10px; }
+        td.num { text-align: right; white-space: nowrap; }
+        tr.total td { font-weight: bold; border-top: 2px solid #1f2933; }
+
+        footer {
+            margin-top: 18px;
+            padding-top: 8px;
+            border-top: 1px solid #cbd2d9;
+            color: #616e7c;
+            font-size: 9px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+<h1>Informe trimestral</h1>
+<p class="muted">Ejemplo de documento HTML guardado en el disco y cargado con <code>Pdf::file()</code>.</p>
+
+<div class="aviso">
+    El archivo no lo interpreta Blade: se entrega al motor tal cual, sin pasar por el motor de plantillas.
+</div>
+
+<h2>Ventas por trimestre</h2>
+<table>
+    <thead>
+    <tr>
+        <th>Trimestre</th>
+        <th>Facturas</th>
+        <th>Importe</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr><td>Primer trimestre</td><td>128</td><td class="num">84.320,00 €</td></tr>
+    <tr><td>Segundo trimestre</td><td>143</td><td class="num">91.775,50 €</td></tr>
+    <tr><td>Tercer trimestre</td><td>167</td><td class="num">112.480,00 €</td></tr>
+    <tr class="total"><td>Total</td><td>438</td><td class="num">288.575,50 €</td></tr>
+    </tbody>
+</table>
+
+<h2>Distribución por canal</h2>
+<table>
+    <thead>
+    <tr><th>Canal</th><th>Porcentaje</th></tr>
+    </thead>
+    <tbody>
+    <tr><td>Directo</td><td class="num">52 %</td></tr>
+    <tr><td>Distribuidor</td><td class="num">31 %</td></tr>
+    <tr><td>Online</td><td class="num">17 %</td></tr>
+    </tbody>
+</table>
+
+<footer>Documento cargado desde el disco · Vellum</footer>
+</body>
+</html>
