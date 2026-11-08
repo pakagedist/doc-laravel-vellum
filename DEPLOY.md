@@ -10,7 +10,7 @@ pueden leer la tabla `users`; si no hay BD usan datos de ejemplo.
 | :-: | --- |
 | 🐘 | PHP **8.4+** con `dom`, `mbstring`, `gd`, `zip`, `intl`, `pdo_sqlite` y `opcache` |
 | 📦 | Composer 2 y `git` (la dependencia Vellum se instala desde GitHub) |
-| 🟢 | Node.js 20+ y npm (solo para compilar assets) |
+| 🟢 | Node.js 22+ y npm (solo para compilar assets). `.nvmrc` fija la versión |
 | 🐳 | Docker + Docker Compose v2 (si usas el camino Docker) |
 
 Extensiones en Debian/Ubuntu:
@@ -98,6 +98,41 @@ php artisan route:cache
 php artisan view:cache
 ```
 
+## Camino C — Nixpacks / Dokploy
+
+Dokploy (y Railway) construyen la imagen con **Nixpacks**, sin Dockerfile.
+
+Claves del build:
+
+- `.nvmrc` = `22` → Nixpacks instala **Node 22**. Sin ese archivo cae a Node 18 y
+  `npm run build` falla con
+  `The requested module 'node:util' does not provide an export named 'styleText'`
+  (Vite 8 / rolldown exigen Node `^20.19` o `>=22.12`).
+- PHP 8.4 se detecta solo desde `composer.json` (`"php": "^8.4"`).
+- La app **no necesita base de datos**: no corras `migrate` ni configures Postgres.
+
+Variables de entorno (pestaña *Environment* de Dokploy):
+
+| Variable | Valor | ¿Obligatoria? |
+| --- | --- | --- |
+| `APP_KEY` | `base64:...` (genera con `php artisan key:generate --show`) | Sí |
+| `APP_ENV` | `production` | No |
+| `APP_DEBUG` | `false` | No |
+| `APP_URL` | `https://docs.tudominio.com` | No |
+| `SESSION_DRIVER` | `file` | No (ya es el default) |
+| `CACHE_STORE` | `file` | No (ya es el default) |
+| `QUEUE_CONNECTION` | `sync` | No (ya es el default) |
+| `SHOWCASE_USERS_DEMO` | `false` | No |
+
+Notas:
+
+- Sin `APP_KEY` Laravel lanza `MissingAppKeyException` y todas las rutas devuelven 500.
+- Nixpacks sirve en `PORT` (80 por defecto).
+- La imagen no incluye Chromium: `PDF_DRIVER=browsershot` no funciona; usa `PDF_DRIVER=dompdf` (default).
+- Nixpacks da permiso de escritura a `storage` al arrancar; `storage/framework/*` y
+  `storage/logs` viajan en la imagen.
+- Alternativa a `.nvmrc`: variable `NIXPACKS_NODE_VERSION=22`.
+
 ## Modo sin base de datos (por defecto)
 
 ```env
@@ -164,6 +199,7 @@ PDF_DRIVER=browsershot
 | HTTP 500 tras cambiar `.env` | `php artisan config:clear && php artisan config:cache` |
 | `The stream or file "storage/logs/laravel.log" could not be opened` | Permisos: `chown -R www-data:www-data storage bootstrap/cache` |
 | `browsershot` da timeout | Falta Chromium: `npx puppeteer browsers install chrome` o usa `PDF_DRIVER=dompdf` |
+| `SyntaxError: ... 'node:util' does not provide an export named 'styleText'` | Nixpacks usó Node 18: añade `.nvmrc` con `22` (o `NIXPACKS_NODE_VERSION=22`) |
 
 ## Diferencia con `timelock`
 
