@@ -1,0 +1,40 @@
+services:
+    app:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile
+            args:
+                WWWUSER: '${WWWUSER:-1000}'
+                WWWGROUP: '${WWWGROUP:-1000}'
+        image: doc-laravel-vellum/app
+        restart: unless-stopped
+        working_dir: /var/www/html
+        environment:
+            # En Docker la app alcanza el archivo estático a través de nginx.
+            SHOWCASE_REMOTE_URL: '${SHOWCASE_REMOTE_URL:-http://web/showcase/remoto.html}'
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - vellum
+        healthcheck:
+            test: ["CMD", "php", "-r", "exit(@fsockopen('127.0.0.1', 9000) ? 0 : 1);"]
+            interval: 15s
+            timeout: 5s
+            retries: 5
+
+    web:
+        image: nginx:1.27-alpine
+        restart: unless-stopped
+        depends_on:
+            - app
+        ports:
+            - '${APP_PORT:-8080}:80'
+        volumes:
+            - '.:/var/www/html:ro'
+            - './docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro'
+        networks:
+            - vellum
+
+networks:
+    vellum:
+        driver: bridge

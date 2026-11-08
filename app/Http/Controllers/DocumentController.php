@@ -6,7 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Documents\DocumentOptions;
 use App\Documents\DocumentRenderer;
-use App\Models\User;
+use App\Showcase\Support\SampleData;
 use Symfony\Component\HttpFoundation\Response;
 
 final class DocumentController extends Controller
@@ -18,7 +18,7 @@ final class DocumentController extends Controller
      */
     public function users(): Response
     {
-        $users = User::query()->orderBy('name')->get();
+        $users = SampleData::usersForPdf();
 
         return $this->renderer->download('documents.users', [
             'users' => $users,

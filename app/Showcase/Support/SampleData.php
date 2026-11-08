@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Showcase\Support;
 
 use App\Models\User;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Throwable;
 
 /**
@@ -76,11 +78,7 @@ final class SampleData
      */
     public static function users(): array
     {
-        try {
-            $usuarios = User::query()->orderBy('name')->limit(25)->get();
-        } catch (Throwable) {
-            $usuarios = collect();
-        }
+        $usuarios = self::queryUsers();
 
         if ($usuarios->isNotEmpty()) {
             return $usuarios->map(static fn (User $usuario): array => [
@@ -90,6 +88,54 @@ final class SampleData
             ])->all();
         }
 
+        return self::fallbackUsers();
+    }
+
+    /**
+     * Usuarios con forma de modelo para las plantillas que usan colecciones.
+     *
+     * Sin SHOWCASE_USERS_DEMO no se toca la base de datos: se devuelven los
+     * datos de reserva, así la app de documentación arranca sin BD.
+     *
+     * @return Collection<int, object>
+     */
+    public static function usersForPdf(): Collection
+    {
+        $usuarios = self::queryUsers();
+
+        if ($usuarios->isNotEmpty()) {
+            return $usuarios;
+        }
+
+        return collect(self::fallbackUsers())->map(static fn (array $usuario): object => (object) [
+            'name' => $usuario['name'],
+            'email' => $usuario['email'],
+            'email_verified_at' => null,
+            'created_at' => Carbon::createFromFormat('d/m/Y', $usuario['alta']),
+        ]);
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    private static function queryUsers(): Collection
+    {
+        if (! config('showcase.users_demo')) {
+            return collect();
+        }
+
+        try {
+            return User::query()->orderBy('name')->limit(25)->get();
+        } catch (Throwable) {
+            return collect();
+        }
+    }
+
+    /**
+     * @return list<array{name: string, email: string, alta: string}>
+     */
+    private static function fallbackUsers(): array
+    {
         return [
             ['name' => 'Ana Torres', 'email' => 'ana.torres@ejemplo.test', 'alta' => '02/01/2026'],
             ['name' => 'Bruno Ledesma', 'email' => 'bruno.ledesma@ejemplo.test', 'alta' => '14/03/2026'],

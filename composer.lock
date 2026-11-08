@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0f02a15655343dea48e8aff57e4ef1b9",
+    "content-hash": "8801f17b3d4817037dfc689ee1fde34c",
     "packages": [
         {
             "name": "brick/math",
@@ -1217,10 +1217,16 @@
         {
             "name": "laravel-vellum/laravel-vellum",
             "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "../laravel-vellum",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/pakagedist/laravel-vellum.git",
                 "reference": "0fd676295813cc226791f3e362385edd017f5201"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/pakagedist/laravel-vellum/zipball/0fd676295813cc226791f3e362385edd017f5201",
+                "reference": "0fd676295813cc226791f3e362385edd017f5201",
+                "shasum": ""
             },
             "require": {
                 "ext-json": "*",
@@ -1256,6 +1262,7 @@
                 "spatie/browsershot": "Required to use the Browsershot driver (also needs Node.js and Chromium).",
                 "twig/twig": "Required to use the Twig source."
             },
+            "default-branch": true,
             "type": "library",
             "extra": {
                 "laravel": {
@@ -1316,10 +1323,11 @@
                 "vellum",
                 "zugferd"
             ],
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
+            "support": {
+                "source": "https://github.com/pakagedist/laravel-vellum/tree/main",
+                "issues": "https://github.com/pakagedist/laravel-vellum/issues"
+            },
+            "time": "2026-10-23T14:01:06+00:00"
         },
         {
             "name": "laravel/framework",
@@ -9776,7 +9784,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": "^8.3"
+        "php": "^8.4"
     },
     "platform-dev": {},
     "plugin-api-version": "2.6.0"

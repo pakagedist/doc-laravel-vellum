@@ -91,25 +91,27 @@ flowchart LR
 
 | | Necesitas | Nota |
 | :-: | --- | --- |
-| 🐘 | PHP 8.3+ y Composer | El proyecto usa tipos estrictos y `readonly`. |
-| 🧱 | [`laravel-vellum`](../laravel-vellum) en `../laravel-vellum` | Se enlaza como repositorio `path` con symlink. Sin él, `composer install` falla. |
+| 🐘 | PHP 8.4+ y Composer | El proyecto usa tipos estrictos y `readonly`. |
+| 🧱 | [`laravel-vellum`](https://github.com/pakagedist/laravel-vellum) | Se instala por VCS desde GitHub; el lock fija el commit. No requiere carpeta hermana. |
 | 🟢 | Node.js + npm | Solo para compilar los assets y, si quieres, descargar Chromium. |
 | 🌐 | Chromium / Puppeteer | Opcional. Sin él, `browsershot` aparece como no disponible. |
-| 🗄️ | SQLite | Base de datos por defecto; no hace falta levantar un servidor. |
+| 🗄️ | SQLite (opcional) | La app arranca **sin base de datos**. Solo las demos de usuarios la usan. |
 
-### En cinco comandos
+### En cuatro comandos
 
 ```bash
 composer install
 cp .env.example .env
 php artisan key:generate
-php artisan migrate --seed
 npm install && npm run build
 ```
 
 > [!NOTE]
-> `php artisan migrate --seed` crea los usuarios de ejemplo que alimentan
-> `/documents/users`. No es obligatorio para el panel, pero sí para esa demo.
+> No hace falta `php artisan migrate`: sesión, caché y cola usan disco. Si
+> quieres las demos con usuarios reales, activa `SHOWCASE_USERS_DEMO=true` y
+> ejecuta `composer setup:demo` (o `php artisan migrate --force --seed`).
+
+Despliegue en VPS (Docker o Nginx nativo): ver [`DEPLOY.md`](DEPLOY.md).
 
 ### Servidor
 

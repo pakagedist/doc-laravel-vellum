@@ -6,9 +6,9 @@
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
-        "php": "^8.3",
+        "php": "^8.4",
         "dompdf/dompdf": "^3.1",
-        "laravel-vellum/laravel-vellum": "*@dev",
+        "laravel-vellum/laravel-vellum": "dev-main#0fd676295813cc226791f3e362385edd017f5201",
         "laravel/framework": "^13.17",
         "laravel/tinker": "^3.0",
         "mpdf/mpdf": "^8.3",
@@ -44,9 +44,11 @@
             "composer install",
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
             "@php artisan key:generate",
-            "@php artisan migrate --force",
             "npm install --ignore-scripts",
             "npm run build"
+        ],
+        "setup:demo": [
+            "@php artisan migrate --force --seed"
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
@@ -93,11 +95,8 @@
     "prefer-stable": true,
     "repositories": {
         "vellum": {
-            "type": "path",
-            "url": "../laravel-vellum",
-            "options": {
-                "symlink": true
-            }
+            "type": "vcs",
+            "url": "https://github.com/pakagedist/laravel-vellum.git"
         }
     }
 }

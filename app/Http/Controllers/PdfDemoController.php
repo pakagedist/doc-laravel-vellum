@@ -7,7 +7,7 @@ namespace App\Http\Controllers;
 use App\Documents\DocumentOptions;
 use App\Documents\DocumentRenderer;
 use App\Documents\PdfInspector;
-use App\Models\User;
+use App\Showcase\Support\SampleData;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -35,7 +35,7 @@ final class PdfDemoController extends Controller
         $options = $this->options($request);
 
         $data = [
-            'users' => User::query()->orderBy('name')->get(),
+            'users' => SampleData::usersForPdf(),
             'generatedAt' => now(),
         ];
 
@@ -59,7 +59,7 @@ final class PdfDemoController extends Controller
 
         try {
             $result = $this->renderer->render('documents.users', [
-                'users' => User::query()->orderBy('name')->get(),
+                'users' => SampleData::usersForPdf(),
                 'generatedAt' => now(),
             ], $options);
         } catch (DriverNotSupportedException $exception) {
