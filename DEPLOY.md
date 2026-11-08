@@ -146,6 +146,13 @@ SHOWCASE_USERS_DEMO=false
 No ejecutes `migrate`. La app no abre SQLite: sesión, caché y cola no la usan,
 y las demos de usuarios muestran datos de ejemplo.
 
+Además, `AppServiceProvider` degrada en tiempo de ejecución los drivers
+respaldados por BD (`session.driver`, `cache.default` y `queue.default`) a
+`file` / `file` / `sync`. Si el entorno llega a `SESSION_DRIVER=database`
+(por ejemplo, copiado de otra app), la sesión **no** consulta la tabla
+`sessions` y la aplicación funciona sin base de datos. Aun así, deja esas
+variables en `file` / `file` / `sync` para que la configuración refleje lo real.
+
 ## Modo con SQLite (demos reales de usuarios)
 
 ```env
@@ -193,7 +200,7 @@ PDF_DRIVER=browsershot
 | Síntoma | Causa / solución |
 | --- | --- |
 | `No application encryption key has been specified` | Falta `.env` o `APP_KEY`: `cp .env.example .env && php artisan key:generate` |
-| `Database file at path ... does not exist ... select * from "sessions"` | `.env` viejo con `SESSION_DRIVER=database`. Usa `file` o ejecuta `php artisan migrate` |
+| `Database file at path ... does not exist ... select * from "sessions"` | Variable `SESSION_DRIVER=database` en el entorno: ponla en `file` (la app la degrada sola, pero mejor no dejarla) |
 | `Could not find package laravel-vellum/laravel-vellum` | `composer.json` volvió al repo `path`. Usa el repo VCS y `composer update laravel-vellum/laravel-vellum` |
 | `Unable to locate file in Vite manifest` | Falta `npm run build` (o `./start.sh build`) |
 | HTTP 500 tras cambiar `.env` | `php artisan config:clear && php artisan config:cache` |
