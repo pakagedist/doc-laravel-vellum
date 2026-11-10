@@ -191,6 +191,7 @@ PDF_DRIVER=browsershot
 | --- | --- |
 | `No application encryption key has been specified` | Falta `.env` o `APP_KEY`: `cp .env.example .env && php artisan key:generate` |
 | `Database file at path ... does not exist ... select * from "sessions"` | Variable `SESSION_DRIVER=database` en el entorno: ponla en `file` (la app la degrada sola, pero mejor no dejarla) |
+| `The [mpdf] driver failed to render the PDF: Temporary files directory ".../vendor/mpdf/mpdf/tmp/mpdf" is not writable` | `vendor/` no es escribible en producción. La app usa `storage/framework/mpdf` para los temporales de mPDF (`PDF_TEMP_FOLDER` lo cambia). Borra la caché de configuración y vuelve a desplegar |
 | `Database connection [null] not configured` | Algún código intenta usar la BD: esta app no tiene conexiones. Revisa el fragmento que lo llama |
 | `Could not find package laravel-vellum/laravel-vellum` | `composer.json` volvió al repo `path`. Usa el repo VCS y `composer update laravel-vellum/laravel-vellum` |
 | `Unable to locate file in Vite manifest` | Falta `npm run build` (o `./start.sh build`) |

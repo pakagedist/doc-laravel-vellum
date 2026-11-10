@@ -24,7 +24,25 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        $this->preparePdfTemporaryFolder();
+    }
+
+    /**
+     * mPDF necesita un directorio escribible para sus temporales y su caché
+     * de fuentes: por defecto apunta dentro de `vendor/`, que en producción no
+     * se puede escribir.
+     */
+    private function preparePdfTemporaryFolder(): void
+    {
+        $folder = config('pdf.drivers.mpdf.temp_folder');
+
+        if (! is_string($folder) || $folder === '') {
+            return;
+        }
+
+        if (! is_dir($folder)) {
+            @mkdir($folder, 0775, true);
+        }
     }
 
     /**

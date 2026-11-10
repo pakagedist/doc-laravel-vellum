@@ -82,6 +82,10 @@ return [
         ],
 
         'mpdf' => [
+            // mPDF escribe sus temporales y su caché de fuentes dentro de
+            // `vendor/` por defecto, y `vendor/` no es escribible en
+            // producción. Se usa una carpeta propia dentro de `storage/`.
+            'temp_folder' => env('PDF_TEMP_FOLDER', storage_path('framework/mpdf')),
             'options' => [],
         ],
 
