@@ -95,7 +95,7 @@ flowchart LR
 | 🧱 | [`laravel-vellum`](https://github.com/pakagedist/laravel-vellum) | Se instala por VCS desde GitHub; el lock fija el commit. No requiere carpeta hermana. |
 | 🟢 | Node.js + npm | Solo para compilar los assets y, si quieres, descargar Chromium. |
 | 🌐 | Chromium / Puppeteer | Opcional. Sin él, `browsershot` aparece como no disponible. |
-| 🗄️ | SQLite (opcional) | La app arranca **sin base de datos**. Solo las demos de usuarios la usan. |
+| 🗄️ | Base de datos | **No hace falta.** La app no tiene conexiones configuradas. |
 
 ### En cuatro comandos
 
@@ -107,9 +107,9 @@ npm install && npm run build
 ```
 
 > [!NOTE]
-> No hace falta `php artisan migrate`: sesión, caché y cola usan disco. Si
-> quieres las demos con usuarios reales, activa `SHOWCASE_USERS_DEMO=true` y
-> ejecuta `composer setup:demo` (o `php artisan migrate --force --seed`).
+> La aplicación **no usa base de datos**: no hay migraciones, modelos ni seeders, y
+> `php artisan migrate` es un no-op que termina con éxito. Sesión, caché y cola
+> usan disco o se ejecutan en el mismo proceso.
 
 Despliegue en VPS (Docker o Nginx nativo): ver [`DEPLOY.md`](DEPLOY.md).
 

@@ -6,14 +6,10 @@ namespace Tests\Feature\Http\Controllers;
 
 use App\Documents\EngineProbe;
 use App\Documents\PdfInspector;
-use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class PdfDemoControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     public function test_demo_index_lists_the_available_engines(): void
     {
         $response = $this->get('/pdf');
@@ -26,8 +22,6 @@ class PdfDemoControllerTest extends TestCase
 
     public function test_users_endpoint_returns_a_pdf_document(): void
     {
-        User::factory()->count(2)->create();
-
         $response = $this->get('/pdf/users');
 
         $response->assertOk();
@@ -72,8 +66,6 @@ class PdfDemoControllerTest extends TestCase
 
     public function test_users_endpoint_applies_the_requested_font(): void
     {
-        User::factory()->count(2)->create();
-
         $response = $this->get('/pdf/users?font=DejaVu%20Serif');
 
         $response->assertOk();
@@ -120,8 +112,6 @@ class PdfDemoControllerTest extends TestCase
 
     public function test_inspect_endpoint_returns_the_metrics_of_the_render(): void
     {
-        User::factory()->create();
-
         $response = $this->get('/pdf/inspect');
 
         $response->assertOk();

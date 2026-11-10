@@ -15,12 +15,10 @@ RUN apk add --no-cache \
         freetype-dev \
         libzip-dev \
         icu-dev \
-        sqlite-dev \
         oniguruma-dev \
     && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j"$(nproc)" \
-        pdo_sqlite \
         mbstring \
         exif \
         pcntl \

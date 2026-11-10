@@ -103,7 +103,7 @@ return [
     */
 
     'batching' => [
-        'database' => env('DB_CONNECTION', 'sqlite'),
+        'database' => null,
         'table' => 'job_batches',
     ],
 
@@ -121,9 +121,7 @@ return [
     */
 
     'failed' => [
-        'driver' => env('QUEUE_FAILED_DRIVER', 'database-uuids'),
-        'database' => env('DB_CONNECTION', 'sqlite'),
-        'table' => 'failed_jobs',
+        'driver' => env('QUEUE_FAILED_DRIVER', 'null'),
     ],
 
 ];

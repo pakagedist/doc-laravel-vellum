@@ -5,18 +5,12 @@ declare(strict_types=1);
 namespace Tests\Feature\Http\Controllers;
 
 use App\Documents\PdfInspector;
-use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class DocumentControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     public function test_users_endpoint_returns_a_pdf_document(): void
     {
-        User::factory()->count(3)->create();
-
         $response = $this->get('/documents/users');
 
         $response->assertOk();
@@ -30,8 +24,6 @@ class DocumentControllerTest extends TestCase
 
     public function test_users_endpoint_uses_the_paper_configured_in_the_application(): void
     {
-        User::factory()->create();
-
         $body = (string) $this->get('/documents/users')->getContent();
 
         // A4 vertical: 595,28 x 841,89 puntos.

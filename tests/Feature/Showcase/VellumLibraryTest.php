@@ -9,7 +9,6 @@ use App\Showcase\Processors\WatermarkProcessor;
 use App\Showcase\Sources\PlantillaSource;
 use App\Showcase\Support\DemoCertificate;
 use App\Showcase\Support\SampleData;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Twig\Environment;
 use Vellum\Exceptions\DriverNotSupportedException;
@@ -26,8 +25,6 @@ use Vellum\Support\PdfResult;
  */
 class VellumLibraryTest extends TestCase
 {
-    use RefreshDatabase;
-
     private PdfManager $pdf;
 
     protected function setUp(): void

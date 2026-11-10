@@ -4,14 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Console\Commands;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
 final class PdfSmokeCommandTest extends TestCase
 {
-    use RefreshDatabase;
-
     public function test_it_renders_every_document_with_dompdf(): void
     {
         $this->artisan('pdf:smoke', ['--driver' => ['dompdf']])

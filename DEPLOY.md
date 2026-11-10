@@ -1,14 +1,15 @@
 # Despliegue en un VPS
 
-Esta app es de **documentación**: por defecto funciona **sin base de datos**.
-Solo las demos de usuarios (`/documents/users`, `/pdf/users` y `/pdf/inspect`)
-pueden leer la tabla `users`; si no hay BD usan datos de ejemplo.
+Esta app es de **documentación** y funciona **sin base de datos**: no hay
+migraciones, modelos ni seeders, y ninguna conexión está configurada. Las
+demos de usuarios (`/documents/users`, `/pdf/users` y `/pdf/inspect`) muestran
+siempre datos de ejemplo.
 
 ## Requisitos
 
 | | Necesitas |
 | :-: | --- |
-| 🐘 | PHP **8.4+** con `dom`, `mbstring`, `gd`, `zip`, `intl`, `pdo_sqlite` y `opcache` |
+| 🐘 | PHP **8.4+** con `dom`, `mbstring`, `gd`, `zip`, `intl` y `opcache` |
 | 📦 | Composer 2 y `git` (la dependencia Vellum se instala desde GitHub) |
 | 🟢 | Node.js 22+ y npm (solo para compilar assets). `.nvmrc` fija la versión |
 | 🐳 | Docker + Docker Compose v2 (si usas el camino Docker) |
@@ -17,7 +18,7 @@ Extensiones en Debian/Ubuntu:
 
 ```bash
 sudo apt install php8.4-fpm php8.4-cli php8.4-xml php8.4-mbstring \
-    php8.4-gd php8.4-zip php8.4-intl php8.4-sqlite3 php8.4-opcache \
+    php8.4-gd php8.4-zip php8.4-intl php8.4-opcache \
     composer nginx
 ```
 
@@ -38,7 +39,6 @@ Comandos:
 
 ```bash
 ./start.sh build     # npm run build
-./start.sh migrate   # solo si activas SHOWCASE_USERS_DEMO
 ./start.sh shell
 ./start.sh logs
 ./start.sh down
@@ -109,7 +109,8 @@ Claves del build:
   `The requested module 'node:util' does not provide an export named 'styleText'`
   (Vite 8 / rolldown exigen Node `^20.19` o `>=22.12`).
 - PHP 8.4 se detecta solo desde `composer.json` (`"php": "^8.4"`).
-- La app **no necesita base de datos**: no corras `migrate` ni configures Postgres.
+- La app **no tiene base de datos**: no hay que configurar Postgres ni ejecutar
+  `migrate`. Si tu hook de despliegue la ejecuta, termina con éxito sin hacer nada.
 
 Variables de entorno (pestaña *Environment* de Dokploy):
 
@@ -122,29 +123,31 @@ Variables de entorno (pestaña *Environment* de Dokploy):
 | `SESSION_DRIVER` | `file` | No (ya es el default) |
 | `CACHE_STORE` | `file` | No (ya es el default) |
 | `QUEUE_CONNECTION` | `sync` | No (ya es el default) |
-| `SHOWCASE_USERS_DEMO` | `false` | No |
 
 Notas:
 
 - Sin `APP_KEY` Laravel lanza `MissingAppKeyException` y todas las rutas devuelven 500.
+- Borra cualquier variable `DB_*` heredada de otro proyecto: la app ignora las
+  conexiones, pero `config:cache` las congelaría en la imagen.
 - Nixpacks sirve en `PORT` (80 por defecto).
 - La imagen no incluye Chromium: `PDF_DRIVER=browsershot` no funciona; usa `PDF_DRIVER=dompdf` (default).
 - Nixpacks da permiso de escritura a `storage` al arrancar; `storage/framework/*` y
   `storage/logs` viajan en la imagen.
 - Alternativa a `.nvmrc`: variable `NIXPACKS_NODE_VERSION=22`.
 
-## Modo sin base de datos (por defecto)
+## Sin base de datos
 
 ```env
-DB_CONNECTION=sqlite
 SESSION_DRIVER=file
 CACHE_STORE=file
 QUEUE_CONNECTION=sync
-SHOWCASE_USERS_DEMO=false
 ```
 
-No ejecutes `migrate`. La app no abre SQLite: sesión, caché y cola no la usan,
-y las demos de usuarios muestran datos de ejemplo.
+La configuración de base de datos está vacía (`database.default` es `null` y no
+hay conexiones), así que **ninguna petición abre una conexión** ni crea un
+archivo SQLite. `php artisan migrate` (y el resto de la familia `migrate:*`) es
+un no-op que termina con código 0: si tu plataforma lo ejecuta en el
+despliegue, no rompe nada.
 
 Además, `AppServiceProvider` degrada en tiempo de ejecución los drivers
 respaldados por BD (`session.driver`, `cache.default` y `queue.default`) a
@@ -152,19 +155,6 @@ respaldados por BD (`session.driver`, `cache.default` y `queue.default`) a
 (por ejemplo, copiado de otra app), la sesión **no** consulta la tabla
 `sessions` y la aplicación funciona sin base de datos. Aun así, deja esas
 variables en `file` / `file` / `sync` para que la configuración refleje lo real.
-
-## Modo con SQLite (demos reales de usuarios)
-
-```env
-SHOWCASE_USERS_DEMO=true
-```
-
-```bash
-php artisan migrate --force --seed
-```
-
-Con Docker: `./start.sh migrate`. Requiere que `database/` sea escribible por
-PHP (el archivo `database/database.sqlite` se crea solo al migrar).
 
 ## Dependencia `laravel-vellum`
 
@@ -201,6 +191,7 @@ PDF_DRIVER=browsershot
 | --- | --- |
 | `No application encryption key has been specified` | Falta `.env` o `APP_KEY`: `cp .env.example .env && php artisan key:generate` |
 | `Database file at path ... does not exist ... select * from "sessions"` | Variable `SESSION_DRIVER=database` en el entorno: ponla en `file` (la app la degrada sola, pero mejor no dejarla) |
+| `Database connection [null] not configured` | Algún código intenta usar la BD: esta app no tiene conexiones. Revisa el fragmento que lo llama |
 | `Could not find package laravel-vellum/laravel-vellum` | `composer.json` volvió al repo `path`. Usa el repo VCS y `composer update laravel-vellum/laravel-vellum` |
 | `Unable to locate file in Vite manifest` | Falta `npm run build` (o `./start.sh build`) |
 | HTTP 500 tras cambiar `.env` | `php artisan config:clear && php artisan config:cache` |
@@ -211,6 +202,5 @@ PDF_DRIVER=browsershot
 ## Diferencia con `timelock`
 
 `timelock` es una app de uso: **Postgres obligatorio**, 21 migraciones y
-`compose.yaml` con servicio `pgsql`. Esta app es de documentación: **sin BD por
-defecto**, SQLite opcional solo para las demos de usuarios, y su `compose.yaml`
-levanta únicamente app + nginx.
+`compose.yaml` con servicio `pgsql`. Esta app es de documentación: **sin BD**,
+ni migraciones ni seeders, y su `compose.yaml` levanta únicamente app + nginx.

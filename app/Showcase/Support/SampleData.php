@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace App\Showcase\Support;
 
-use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
-use Throwable;
 
 /**
  * Datos de ejemplo que usan las plantillas del panel.
@@ -70,65 +68,31 @@ final class SampleData
     }
 
     /**
-     * Listado de usuarios de la aplicación, o datos de reserva si no hay
-     * ninguno en la base de datos (por ejemplo, en una instalación recién
-     * migrada o en un entorno de pruebas sin tablas).
+     * Listado de usuarios de ejemplo.
+     *
+     * La aplicación no tiene base de datos, así que las plantillas del panel
+     * siempre se alimentan con datos ficticios y estables.
      *
      * @return list<array{name: string, email: string, alta: string}>
      */
     public static function users(): array
     {
-        $usuarios = self::queryUsers();
-
-        if ($usuarios->isNotEmpty()) {
-            return $usuarios->map(static fn (User $usuario): array => [
-                'name' => $usuario->name,
-                'email' => $usuario->email,
-                'alta' => $usuario->created_at?->format('d/m/Y') ?? '—',
-            ])->all();
-        }
-
         return self::fallbackUsers();
     }
 
     /**
      * Usuarios con forma de modelo para las plantillas que usan colecciones.
      *
-     * Sin SHOWCASE_USERS_DEMO no se toca la base de datos: se devuelven los
-     * datos de reserva, así la app de documentación arranca sin BD.
-     *
      * @return Collection<int, object>
      */
     public static function usersForPdf(): Collection
     {
-        $usuarios = self::queryUsers();
-
-        if ($usuarios->isNotEmpty()) {
-            return $usuarios;
-        }
-
         return collect(self::fallbackUsers())->map(static fn (array $usuario): object => (object) [
             'name' => $usuario['name'],
             'email' => $usuario['email'],
             'email_verified_at' => null,
             'created_at' => Carbon::createFromFormat('d/m/Y', $usuario['alta']),
         ]);
-    }
-
-    /**
-     * @return Collection<int, User>
-     */
-    private static function queryUsers(): Collection
-    {
-        if (! config('showcase.users_demo')) {
-            return collect();
-        }
-
-        try {
-            return User::query()->orderBy('name')->limit(25)->get();
-        } catch (Throwable) {
-            return collect();
-        }
     }
 
     /**

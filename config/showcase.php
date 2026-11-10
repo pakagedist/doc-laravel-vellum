@@ -48,18 +48,4 @@ return [
 
     'preview_directory' => 'pdf-showcase',
 
-    /*
-    |--------------------------------------------------------------------------
-    | Demos con base de datos
-    |--------------------------------------------------------------------------
-    |
-    | `/documents/users` y `/pdf/users` pueden consultar la tabla `users`.
-    | Por defecto no tocan la base de datos y usan datos de ejemplo, para que
-    | la aplicación de documentación arranque sin BD. Actívalas con
-    | SHOWCASE_USERS_DEMO=true y ejecutando `php artisan migrate --force --seed`.
-    |
-    */
-
-    'users_demo' => (bool) env('SHOWCASE_USERS_DEMO', false),
-
 ];

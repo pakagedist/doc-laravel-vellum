@@ -5,7 +5,6 @@
 # Uso:
 #   ./start.sh            # instala dependencias, compila assets y levanta la app
 #   ./start.sh build      # solo compila los assets (npm run build)
-#   ./start.sh migrate    # crea/migra SQLite y carga los datos de las demos
 #   ./start.sh shell      # shell dentro del contenedor
 #   ./start.sh logs       # logs en vivo
 #   ./start.sh down       # detiene los contenedores
@@ -37,17 +36,13 @@ case "${MODE}" in
         docker compose run --rm --no-deps app bash
         exit 0
         ;;
-    migrate)
-        run php artisan migrate --force --seed
-        exit 0
-        ;;
     build)
         run sh -lc 'test -d node_modules || npm install --ignore-scripts; npm run build'
         exit 0
         ;;
     up | "") ;;
     *)
-        echo "Uso: ./start.sh [up|build|migrate|shell|logs|down]" >&2
+        echo "Uso: ./start.sh [up|build|shell|logs|down]" >&2
         exit 1
         ;;
 esac
@@ -74,11 +69,6 @@ fi
 
 echo "==> Compilando assets"
 run npm run build
-
-if grep -q '^SHOWCASE_USERS_DEMO=true' .env; then
-    echo "==> Migrando la base de datos de las demos"
-    run php artisan migrate --force --seed
-fi
 
 echo "==> Levantando contenedores"
 docker compose up -d

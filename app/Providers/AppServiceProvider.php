@@ -45,5 +45,15 @@ class AppServiceProvider extends ServiceProvider
         if (config('queue.default') === 'database') {
             config(['queue.default' => 'sync']);
         }
+
+        // Laravel fusiona la configuración de base de datos del framework con
+        // la de la aplicación, por lo que mysql/pgsql/sqlite vuelven a existir
+        // aunque la app declare la lista de conexiones vacía. Se vacían aquí
+        // para que cualquier intento de conexión falle de forma explícita en
+        // lugar de crear un archivo SQLite en el servidor.
+        config([
+            'database.default' => null,
+            'database.connections' => [],
+        ]);
     }
 }
