@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Showcase\Categories;
 
+use App\Documents\Engines;
 use App\Showcase\Fonts\FontCatalog;
 use App\Showcase\Fonts\FontFamily;
 use App\Showcase\ShowcaseCategory;
@@ -23,6 +24,7 @@ final class FontCategory extends ShowcaseCategoryBuilder
     public function __construct(
         private readonly PdfManager $pdf,
         private readonly FontCatalog $fonts,
+        private readonly Engines $engines,
     ) {}
 
     public function build(): ShowcaseCategory
@@ -258,16 +260,27 @@ final class FontCategory extends ShowcaseCategoryBuilder
             }
             PHP;
 
+        $variants = [];
+
+        foreach ([
+            'dompdf' => ['dompdf', 'Incrusta su copia de DejaVu Sans.'],
+            'mpdf' => ['mPDF', 'Resuelve la familia desde su carpeta ttfonts.'],
+            'browsershot' => ['Chromium', 'Usa la fuente instalada en el sistema.'],
+        ] as $key => [$label, $description]) {
+            if ($this->engines->isAvailable($key)) {
+                $variants[] = $this->variant($key, $label, $description);
+            }
+        }
+
         return $this->demo(
             slug: 'motores',
             title: 'La misma fuente en cada motor',
-            summary: 'DejaVu Sans renderizada con dompdf, mPDF y Chromium. Mismo HTML, distinto motor y distinto peso.',
+            summary: 'DejaVu Sans renderizada con '.implode(', ', array_map(
+                static fn (ShowcaseVariant $variant): string => $variant->label,
+                $variants,
+            )).'. Mismo HTML, distinto motor y distinto peso.',
             code: $code,
-            variants: [
-                $this->variant('dompdf', 'dompdf', 'Incrusta su copia de DejaVu Sans.'),
-                $this->variant('mpdf', 'mPDF', 'Resuelve la familia desde su carpeta ttfonts.'),
-                $this->variant('browsershot', 'Chromium', 'Usa la fuente instalada en el sistema.'),
-            ],
+            variants: $variants,
             handler: function (ShowcaseVariant $variant): ShowcaseOutcome {
                 $result = $this->pdf
                     ->view('documents.tipografia', [
@@ -279,11 +292,13 @@ final class FontCategory extends ShowcaseCategoryBuilder
                     ->font('DejaVu Sans')
                     ->render();
 
-                return ShowcaseOutcome::ok($result->bytes, $this->metrics($result), [
-                    'El HTML es el mismo en las tres variantes: solo cambia el motor.',
-                    'dompdf incrusta la fuente completa; Chromium, un subconjunto de los glifos usados; mPDF escribe su propia copia.',
-                    'Chromium tarda más porque arranca un navegador real para cada render.',
-                ]);
+                return ShowcaseOutcome::ok($result->bytes, $this->metrics($result), array_filter([
+                    'El HTML es el mismo en todas las variantes: solo cambia el motor.',
+                    'dompdf incrusta la fuente completa; mPDF escribe su propia copia.',
+                    $this->engines->isAvailable('browsershot')
+                        ? 'Chromium incrusta un subconjunto de los glifos usados y tarda más: arranca un navegador real en cada render.'
+                        : null,
+                ]));
             },
         );
     }

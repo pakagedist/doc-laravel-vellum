@@ -97,6 +97,23 @@ final readonly class FontFamily
     }
 
     /**
+     * La misma familia, pero con solo los motores que se pueden usar aquí.
+     */
+    public function withDrivers(array $drivers): self
+    {
+        return new self(
+            key: $this->key,
+            family: $this->family,
+            kind: $this->kind,
+            origin: $this->origin,
+            drivers: $drivers,
+            file: $this->file,
+            note: $this->note,
+            script: $this->script,
+        );
+    }
+
+    /**
      * El motor que mejor la reproduce: Chromium usa la fuente real y los otros
      * dos solo pueden con las familias de su catálogo. Las fuentes del núcleo
      * PDF se piden a dompdf, porque mPDF las sustituye por DejaVu.

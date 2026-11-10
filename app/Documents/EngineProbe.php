@@ -16,11 +16,23 @@ use Vellum\Facades\Pdf;
  */
 final class EngineProbe
 {
+    public function __construct(
+        private readonly Engines $engines,
+    ) {}
+
     /**
      * Renderiza un documento mínimo con el motor indicado.
      */
     public function probe(string $driver): EngineStatus
     {
+        if (! $this->engines->isAvailable($driver)) {
+            return new EngineStatus(
+                driver: $driver,
+                state: EngineStatus::MISSING,
+                message: $this->engines->reason($driver),
+            );
+        }
+
         try {
             $result = Pdf::html('<p>Comprobación de PDF</p>')->driver($driver)->render();
 

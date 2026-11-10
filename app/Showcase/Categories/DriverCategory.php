@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Showcase\Categories;
 
+use App\Documents\Engines;
 use App\Showcase\ShowcaseCategory;
 use App\Showcase\ShowcaseCategoryBuilder;
 use App\Showcase\ShowcaseDemo;
@@ -20,9 +21,20 @@ use Vellum\PdfManager;
  */
 final class DriverCategory extends ShowcaseCategoryBuilder
 {
+    /**
+     * Motores que se presentan en el panel, con su etiqueta.
+     */
+    private const ENGINES = [
+        'dompdf' => ['DOMPDF', 'Motor por defecto. HTML/CSS 2.1 en PHP puro.'],
+        'mpdf' => ['mPDF', 'Más rápido y con mejor soporte de Unicode.'],
+        'browsershot' => ['Chromium (Browsershot)', 'HTML/CSS moderno vía Node + Puppeteer.'],
+        'fake' => ['Fake (pruebas)', 'No renderiza: devuelve un PDF mínimo y registra la llamada.'],
+    ];
+
     public function __construct(
         private readonly PdfManager $pdf,
         private readonly DriverRegistry $drivers,
+        private readonly Engines $engines,
     ) {}
 
     public function build(): ShowcaseCategory
@@ -30,8 +42,9 @@ final class DriverCategory extends ShowcaseCategoryBuilder
         return new ShowcaseCategory(
             slug: 'motores',
             title: 'Motores de render',
-            summary: 'El motor es intercambiable: DOMPDF (PHP puro), mPDF (PHP rápido), Chromium '
-                .'(HTML/CSS completo) y el motor `fake` para pruebas. El mismo código produce el mismo '
+            summary: 'El motor es intercambiable: DOMPDF (PHP puro), mPDF (PHP rápido)'.($this->engines->isAvailable('browsershot')
+                ? ', Chromium (HTML/CSS completo)'
+                : '').' y el motor `fake` para pruebas. El mismo código produce el mismo '
                 .'documento con cualquiera de ellos.',
             demos: [
                 $this->comparisonDemo(),
@@ -54,18 +67,26 @@ final class DriverCategory extends ShowcaseCategoryBuilder
             // ...o de forma global en config/pdf.php (PDF_DRIVER).
             PHP;
 
+        $variants = [];
+
+        foreach (self::ENGINES as $key => [$label, $description]) {
+            if ($this->engines->isAvailable($key)) {
+                $variants[] = $this->variant($key, $label, $description);
+            }
+        }
+
+        $count = count($variants);
+
         return $this->demo(
             slug: 'comparativa',
-            title: 'El mismo documento, cuatro motores',
+            title: 'El mismo documento, '.($count === 1 ? 'un motor' : $count.' motores'),
             summary: 'La plantilla no cambia: solo el motor. Se puede comparar peso, tiempo y diferencias '
-                .'de maquetación entre DOMPDF, mPDF, Chromium y el motor de pruebas.',
+                .'de maquetación entre '.implode(', ', array_map(
+                    static fn (ShowcaseVariant $variant): string => $variant->label,
+                    $variants,
+                )).'.',
             code: $code,
-            variants: [
-                $this->variant('dompdf', 'DOMPDF', 'Motor por defecto. HTML/CSS 2.1 en PHP puro.'),
-                $this->variant('mpdf', 'mPDF', 'Más rápido y con mejor soporte de Unicode.'),
-                $this->variant('browsershot', 'Chromium (Browsershot)', 'HTML/CSS moderno vía Node + Puppeteer.'),
-                $this->variant('fake', 'Fake (pruebas)', 'No renderiza: devuelve un PDF mínimo y registra la llamada.'),
-            ],
+            variants: $variants,
             handler: function (ShowcaseVariant $variant): ShowcaseOutcome {
                 try {
                     $result = $this->pdf

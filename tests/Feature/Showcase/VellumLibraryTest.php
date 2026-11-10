@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Showcase;
 
+use App\Documents\Engines;
 use App\Documents\PdfInspector;
 use App\Showcase\Processors\WatermarkProcessor;
 use App\Showcase\Sources\PlantillaSource;
@@ -95,10 +96,15 @@ class VellumLibraryTest extends TestCase
 
     public function test_every_installed_driver_renders_the_same_document(): void
     {
+        $engines = $this->app->make(Engines::class);
         $motores = array_keys((array) config('pdf.drivers', []));
         $renderizados = [];
 
         foreach ($motores as $motor) {
+            if (! $engines->isAvailable($motor)) {
+                continue;
+            }
+
             try {
                 $result = $this->pdf
                     ->view('documents.invoice', ['factura' => SampleData::invoice()])

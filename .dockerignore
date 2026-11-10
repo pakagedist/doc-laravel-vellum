@@ -9,6 +9,7 @@
 .idea
 vendor
 node_modules
+.browsers
 public/build
 storage/logs/*
 !storage/logs/.gitignore

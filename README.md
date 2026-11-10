@@ -45,7 +45,7 @@ post-procesado y entrega.
 | | Pieza | Qué demuestra |
 | :-: | --- | --- |
 | 📥 | **6 fuentes** | Blade, HTML, archivo, Twig, URL y una fuente propia. |
-| ⚙️ | **4 motores** | DOMPDF, mPDF, Chromium (Browsershot) y el motor `fake` de tests. |
+| ⚙️ | **4 motores** | DOMPDF, mPDF, Chromium (Browsershot) y el motor `fake` de tests. El panel solo ofrece los que la instalación puede usar. |
 | 🔤 | **74 tipografías** | 29 latinas y 45 para otros alfabetos, descubiertas en la instalación real. |
 | 🧾 | **Conformidad** | XMP, PDF/A-3b, adjuntos y Factur-X/ZUGFeRD. |
 | 🧩 | **Post-procesado** | Unir PDFs, firmar, adjuntar y processors propios. |
@@ -93,8 +93,8 @@ flowchart LR
 | :-: | --- | --- |
 | 🐘 | PHP 8.4+ y Composer | El proyecto usa tipos estrictos y `readonly`. |
 | 🧱 | [`laravel-vellum`](https://github.com/pakagedist/laravel-vellum) | Se instala por VCS desde GitHub; el lock fija el commit. No requiere carpeta hermana. |
-| 🟢 | Node.js + npm | Solo para compilar los assets y, si quieres, descargar Chromium. |
-| 🌐 | Chromium / Puppeteer | Opcional. Sin él, `browsershot` aparece como no disponible. |
+| 🟢 | Node.js + npm | Para compilar los assets y, si quieres, incluir Chromium en la app (`npm run browsers`). |
+| 🌐 | Chromium / Puppeteer | Opcional. Sin él, `browsershot` aparece como no disponible y el panel funciona igual. |
 | 🗄️ | Base de datos | **No hace falta.** La app no tiene conexiones configuradas. |
 
 ### En cuatro comandos
@@ -105,6 +105,11 @@ cp .env.example .env
 php artisan key:generate
 npm install && npm run build
 ```
+
+> [!TIP]
+> Añade `&& npm run browsers` al último comando si quieres que Chromium viaje dentro de la app
+> (`.browsers/`, ~170 MB). La app lo detecta solo y el motor `browsershot` funciona sin instalar
+> nada en el servidor.
 
 > [!NOTE]
 > La aplicación **no usa base de datos**: no hay migraciones, modelos ni seeders, y
@@ -344,15 +349,19 @@ Lo que no se define se hereda de `config/pdf.php`.
 > que todo se renderice de nuevo.
 
 > [!NOTE]
-> **Chromium es opcional.** Si no lo tienes, el panel marca `browsershot` como no instalado y el
-> resto de motores sigue funcionando. `spatie/browsershot` ya viene en `composer.json`; solo falta
-> el navegador:
+> **Chromium es opcional y puede vivir dentro de la app.** Si no lo tienes, el panel marca
+> `browsershot` como no instalado, no ofrece sus variantes y el resto de motores sigue
+> funcionando: no aparece ningún error. Para incluirlo en la imagen de despliegue:
 >
 > ```bash
-> npm install puppeteer
+> npm run browsers
 > ```
 >
-> La configuración publicada ya apunta `node_modules_path` a `base_path('node_modules')`.
+> El navegador se descarga a `.browsers/` (dentro del proyecto) y la app lo detecta sola: no hay
+> que instalar nada en el servidor ni configurar `BROWSERSHOT_CHROME_PATH`. La búsqueda sigue este
+> orden: variable de entorno → `.browsers/` → Chromium del sistema → caché de Puppeteer.
+> `spatie/browsershot` ya viene en `composer.json` y la configuración publicada apunta
+> `node_modules_path` a `base_path('node_modules')`.
 
 ---
 

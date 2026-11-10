@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Documents\DocumentOptions;
 use App\Documents\DocumentRenderer;
+use App\Documents\Engines;
 use App\Documents\PdfInspector;
 use App\Showcase\Support\SampleData;
 use Illuminate\Http\JsonResponse;
@@ -23,6 +24,7 @@ final class PdfDemoController extends Controller
 {
     public function __construct(
         private readonly DocumentRenderer $renderer,
+        private readonly Engines $engines,
     ) {}
 
     /**
@@ -33,6 +35,13 @@ final class PdfDemoController extends Controller
     public function users(Request $request): Response
     {
         $options = $this->options($request);
+
+        if ($options->driver !== null && ! $this->engines->isAvailable($options->driver)) {
+            return $this->missingDriverResponse(
+                $this->engines->reason($options->driver),
+                $options->driver,
+            );
+        }
 
         $data = [
             'users' => SampleData::usersForPdf(),
@@ -46,7 +55,7 @@ final class PdfDemoController extends Controller
 
             return $this->renderer->download('documents.users', $data, $options);
         } catch (DriverNotSupportedException $exception) {
-            return $this->missingDriverResponse($exception, $options->driver);
+            return $this->missingDriverResponse($exception->getMessage(), $options->driver);
         }
     }
 
@@ -56,6 +65,13 @@ final class PdfDemoController extends Controller
     public function inspect(Request $request): JsonResponse
     {
         $options = $this->options($request);
+
+        if ($options->driver !== null && ! $this->engines->isAvailable($options->driver)) {
+            return response()->json([
+                'error' => $this->engines->reason($options->driver),
+                'driver' => $options->driver,
+            ], Response::HTTP_SERVICE_UNAVAILABLE);
+        }
 
         try {
             $result = $this->renderer->render('documents.users', [
@@ -86,11 +102,11 @@ final class PdfDemoController extends Controller
     /**
      * Explica que el motor pedido no está instalado, en lugar de fallar.
      */
-    private function missingDriverResponse(DriverNotSupportedException $exception, ?string $driver): Response
+    private function missingDriverResponse(string $message, ?string $driver): Response
     {
         return response()->view('pdf.missing-driver', [
             'driver' => $driver ?? 'desconocido',
-            'message' => $exception->getMessage(),
+            'message' => $message,
         ], Response::HTTP_SERVICE_UNAVAILABLE);
     }
 

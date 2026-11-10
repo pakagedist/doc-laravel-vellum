@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Showcase\Fonts;
 
+use App\Documents\Engines;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Mpdf\Config\FontVariables;
@@ -123,8 +124,15 @@ final class FontCatalog
      */
     private ?array $families = null;
 
+    public function __construct(
+        private readonly Engines $engines,
+    ) {}
+
     /**
      * Todas las familias disponibles, en el orden del catálogo.
+     *
+     * Se descartan las familias que ningún motor instalado puede usar: sin
+     * Chromium, por ejemplo, las fuentes del sistema no se pueden mostrar.
      *
      * @return list<FontFamily>
      */
@@ -134,10 +142,19 @@ final class FontCatalog
             return $this->families;
         }
 
-        return $this->families = array_map(
-            FontFamily::fromArray(...),
+        $available = $this->engines->available();
+
+        $families = array_map(
+            fn (array $data): FontFamily => FontFamily::fromArray($data)->withDrivers(
+                array_values(array_intersect($data['drivers'], $available))
+            ),
             $this->load(),
         );
+
+        return $this->families = array_values(array_filter(
+            $families,
+            fn (FontFamily $font): bool => $font->drivers !== [],
+        ));
     }
 
     public function find(string $key): ?FontFamily

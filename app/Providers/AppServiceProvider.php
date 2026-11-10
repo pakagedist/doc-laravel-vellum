@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Documents\ChromeLauncher;
+use App\Documents\Engines;
 use App\Showcase\ShowcaseCatalog;
 use Illuminate\Support\ServiceProvider;
 
@@ -15,6 +17,7 @@ class AppServiceProvider extends ServiceProvider
         // El catálogo del panel se construye una sola vez: las categorías
         // generan sus demostraciones al construirse.
         $this->app->singleton(ShowcaseCatalog::class);
+        $this->app->singleton(Engines::class);
 
         $this->useDatabaseLessRuntime();
     }
@@ -25,6 +28,26 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->preparePdfTemporaryFolder();
+        $this->useBundledBrowser();
+    }
+
+    /**
+     * Si hay un Chromium dentro de la app (`.browsers/`), en el sistema o en
+     * la caché de Puppeteer, se le indica a browsershot dónde está: así el
+     * motor funciona sin instalar nada en el servidor.
+     */
+    private function useBundledBrowser(): void
+    {
+        $engines = $this->app->make(Engines::class);
+        $chrome = $engines->chromePath();
+
+        if ($chrome === null) {
+            return;
+        }
+
+        $launcher = $this->app->make(ChromeLauncher::class)->path($chrome, $engines->runsAsRoot());
+
+        config(['pdf.drivers.browsershot.options.chrome_path' => $launcher]);
     }
 
     /**

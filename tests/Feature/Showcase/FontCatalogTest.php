@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Showcase;
 
+use App\Documents\Engines;
 use App\Showcase\Fonts\FontCatalog;
 use Illuminate\Support\Facades\File;
 use Tests\TestCase;
@@ -15,7 +16,7 @@ class FontCatalogTest extends TestCase
 {
     public function test_the_catalog_is_not_empty_and_every_family_has_a_driver(): void
     {
-        $catalog = new FontCatalog;
+        $catalog = $this->catalog();
         $families = $catalog->all();
 
         $this->assertNotEmpty($families);
@@ -29,7 +30,7 @@ class FontCatalogTest extends TestCase
 
     public function test_the_keys_are_unique_and_can_be_looked_up(): void
     {
-        $catalog = new FontCatalog;
+        $catalog = $this->catalog();
         $keys = array_map(fn ($font): string => $font->key, $catalog->all());
 
         $this->assertSame($keys, array_values(array_unique($keys)));
@@ -41,20 +42,23 @@ class FontCatalogTest extends TestCase
         $this->assertNull($catalog->find('no-existe'));
     }
 
-    public function test_dejavu_sans_is_available_in_the_three_engines(): void
+    public function test_dejavu_sans_is_available_in_the_installed_engines(): void
     {
-        $font = (new FontCatalog)->find('dejavu-sans');
+        $font = $this->catalog()->find('dejavu-sans');
 
         $this->assertNotNull($font);
         $this->assertTrue($font->supports('dompdf'));
         $this->assertTrue($font->supports('mpdf'));
-        $this->assertTrue($font->supports('browsershot'));
-        $this->assertSame('browsershot', $font->preferredDriver());
+        $this->assertSame(
+            $this->app->make(Engines::class)->isAvailable('browsershot'),
+            $font->supports('browsershot'),
+        );
+        $this->assertContains($font->preferredDriver(), ['browsershot', 'mpdf', 'dompdf']);
     }
 
     public function test_the_core_fonts_are_preferred_in_dompdf(): void
     {
-        $font = (new FontCatalog)->find('helvetica');
+        $font = $this->catalog()->find('helvetica');
 
         $this->assertNotNull($font);
         $this->assertSame('dompdf', $font->preferredDriver());
@@ -63,7 +67,7 @@ class FontCatalogTest extends TestCase
 
     public function test_the_mpdf_only_families_are_marked_as_such(): void
     {
-        $font = (new FontCatalog)->find('dejavu-sans-condensed');
+        $font = $this->catalog()->find('dejavu-sans-condensed');
 
         $this->assertNotNull($font);
         $this->assertSame(['mpdf'], $font->drivers);
@@ -72,7 +76,7 @@ class FontCatalogTest extends TestCase
 
     public function test_the_totals_add_up_to_the_published_families(): void
     {
-        $catalog = new FontCatalog;
+        $catalog = $this->catalog();
         $totals = $catalog->totals();
 
         $this->assertSame(count($catalog->all()), $totals['total']);
@@ -82,7 +86,7 @@ class FontCatalogTest extends TestCase
 
     public function test_the_catalog_filters_the_families_by_driver(): void
     {
-        $catalog = new FontCatalog;
+        $catalog = $this->catalog();
 
         $dompdf = $catalog->forDriver('dompdf');
 
@@ -97,7 +101,7 @@ class FontCatalogTest extends TestCase
 
     public function test_the_catalog_knows_the_fonts_bundled_with_the_engines(): void
     {
-        $bundled = (new FontCatalog)->bundled();
+        $bundled = $this->catalog()->bundled();
 
         $this->assertGreaterThan(0, $bundled['mpdf']);
         $this->assertGreaterThanOrEqual(3, $bundled['dompdf']);
@@ -105,7 +109,7 @@ class FontCatalogTest extends TestCase
 
     public function test_the_catalog_includes_other_scripts_from_mpdf(): void
     {
-        $catalog = new FontCatalog;
+        $catalog = $this->catalog();
 
         $scripts = [
             'xb-riyaz' => 'Árabe',
@@ -125,7 +129,7 @@ class FontCatalogTest extends TestCase
 
     public function test_the_latin_filter_leaves_out_the_other_scripts(): void
     {
-        $catalog = new FontCatalog;
+        $catalog = $this->catalog();
         $latin = $catalog->latin();
 
         $this->assertNotEmpty($latin);
@@ -150,9 +154,9 @@ class FontCatalogTest extends TestCase
         copy(base_path('vendor/dompdf/dompdf/lib/fonts/DejaVuSans.ttf'), $file);
 
         try {
-            (new FontCatalog)->flush();
+            $this->catalog()->flush();
 
-            $font = (new FontCatalog)->find('vellum-test');
+            $font = $this->catalog()->find('vellum-test');
 
             $this->assertNotNull($font);
             $this->assertSame('Proyecto', $font->originLabel());
@@ -165,7 +169,16 @@ class FontCatalogTest extends TestCase
                 @rmdir($directory);
             }
 
-            (new FontCatalog)->flush();
+            $this->catalog()->flush();
         }
+    }
+
+    /**
+     * El catálogo se resuelve desde el contenedor: así usa los mismos motores
+     * que la aplicación.
+     */
+    private function catalog(): FontCatalog
+    {
+        return $this->app->make(FontCatalog::class);
     }
 }

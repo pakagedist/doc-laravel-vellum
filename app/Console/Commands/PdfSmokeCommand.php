@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Documents\Engines;
 use App\Documents\PdfInspector;
 use App\Showcase\Support\SampleData;
 use Illuminate\Console\Command;
@@ -28,7 +29,7 @@ final class PdfSmokeCommand extends Command
 
     protected $description = 'Renderiza los documentos de la aplicación con cada motor y muestra sus métricas';
 
-    public function handle(): int
+    public function handle(Engines $engines): int
     {
         $configurados = array_keys((array) config('pdf.drivers', []));
         $drivers = (array) $this->option('driver');
@@ -55,6 +56,22 @@ final class PdfSmokeCommand extends Command
                     'warnings' => '0',
                     'detail' => 'No está configurado',
                     'state' => 'error',
+                ];
+
+                continue;
+            }
+
+            if (! $engines->isAvailable($driver)) {
+                $rows[] = [
+                    'name' => '—',
+                    'driver' => $driver,
+                    'label' => '<fg=yellow>NO INSTALADO</>',
+                    'kb' => '0',
+                    'ms' => '0',
+                    'pages' => '0',
+                    'warnings' => '0',
+                    'detail' => $engines->reason($driver),
+                    'state' => 'missing',
                 ];
 
                 continue;
