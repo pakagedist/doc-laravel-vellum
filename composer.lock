@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8801f17b3d4817037dfc689ee1fde34c",
+    "content-hash": "1e8bcbd616d5cc9965c0f4d3d4e8f043",
     "packages": [
         {
             "name": "brick/math",
@@ -1220,12 +1220,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/pakagedist/laravel-vellum.git",
-                "reference": "0fd676295813cc226791f3e362385edd017f5201"
+                "reference": "ee33ea3091b82be4b9be7af2d705b4baa9fa1603"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pakagedist/laravel-vellum/zipball/0fd676295813cc226791f3e362385edd017f5201",
-                "reference": "0fd676295813cc226791f3e362385edd017f5201",
+                "url": "https://api.github.com/repos/pakagedist/laravel-vellum/zipball/ee33ea3091b82be4b9be7af2d705b4baa9fa1603",
+                "reference": "ee33ea3091b82be4b9be7af2d705b4baa9fa1603",
                 "shasum": ""
             },
             "require": {
